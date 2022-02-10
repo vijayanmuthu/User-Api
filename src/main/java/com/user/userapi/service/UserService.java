@@ -5,9 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.web.client.RestTemplate;
 
 import com.user.userapi.Entity.Userdetail;
@@ -16,77 +22,67 @@ import com.user.userapi.repo.UserdetailRepo;
 import com.user.userapi.valueObject.UserdetailVo;
 
 @Service
+@EnableScheduling
 public class UserService {
 	@Autowired
 	UserdetailRepo userdetailRepo;
+	@Value("${url}")
+	private String url;
 
+	@Scheduled(fixedRate = 5000)
 	public ResponseEntity<PageDetail> getuserDetails() {
-		String uri = "https://reqres.in/api/users";
+		// String uri = "https://reqres.in/api/users";
 		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<PageDetail> userResponseEntity = restTemplate.getForEntity(uri, PageDetail.class);
+		ResponseEntity<PageDetail> userResponseEntity = restTemplate.getForEntity(url, PageDetail.class);
 		this.postUser(userResponseEntity.getBody().data);
 		return userResponseEntity;
 	}
 
 	public List<Userdetail> postUser(List<UserdetailVo> userdetail) {
 		ArrayList<Userdetail> user = new ArrayList<>();
-		List<UserdetailVo> userdetailvo = new ArrayList<>();
-		userdetailvo.addAll(userdetail);
 		Map<String, Object> reqresdbmap = new HashMap<>();
-		for (UserdetailVo uservo : userdetailvo) {
+		for (UserdetailVo uservo : userdetail) {
 			reqresdbmap.put(uservo.getEmail(), uservo);
 		}
-		List<Object> getemail = userdetailRepo.findEmail( reqresdbmap.keySet());
-		Map<Object, Object> dbmap = new HashMap<>();
-		for (Object uservo : getemail) {
-			dbmap.put(uservo, uservo);
+		List<Userdetail> getemail = userdetailRepo.findByEmailIn(reqresdbmap.keySet());
+		Map<String, Object> dbmap = new HashMap<>();
+		for (Userdetail uservo : getemail) {
+			dbmap.put(uservo.getEmail(), uservo);
 		}
-		System.out.println("reqres db : " + reqresdbmap);
-		System.out.println("Our db : " + dbmap);
-		for (UserdetailVo userdetailvo1 : userdetailvo) {
-			if (dbmap.containsKey(userdetailvo1.getEmail())) {
-				System.out.println(userdetailvo1.getEmail()+" already exist");
-			} else {
-				Userdetail userdetail1 = new Userdetail();
-				userdetail1.setAvatar(userdetailvo1.getEmail());
-				userdetail1.setEmail(userdetailvo1.getEmail());
-				userdetail1.setFirst_name(userdetailvo1.getFirst_name());
-				userdetail1.setLast_name(userdetailvo1.getLast_name());
-				user.add(userdetail1);
+
+		for (UserdetailVo userdetailVo : userdetail) {
+			if (dbmap.containsKey(userdetailVo.getEmail()) == false) {
+				Userdetail userDetail = new Userdetail();
+				userDetail.setAvatar(userdetailVo.getAvatar());
+				userDetail.setEmail(userdetailVo.getEmail());
+				userDetail.setFirst_name(userdetailVo.getFirst_name());
+				userDetail.setLast_name(userdetailVo.getLast_name());
+				user.add(userDetail);
 			}
 		}
-//		for (int i = 0; i < userdetail.size(); i++) {
-//			if (dbmaps.containsKey(userdetailvo.get(i).getEmail())) {
-//				System.out.println("email is already exist");
-//
-//			} else {
-//				Userdetail userdetail1 = new Userdetail();
-//				userdetail1.setAvatar(userdetail.get(i).getAvatar());
-//				userdetail1.setEmail(userdetail.get(i).getEmail());
-//				userdetail1.setFirst_name(userdetail.get(i).getFirst_name());
-//				userdetail1.setLast_name(userdetail.get(i).getLast_name());
-//				user.add(userdetail1);
-//			}
-//		}
-
 		userdetailRepo.saveAll(user);
 		return user;
 	}
 
-	public Userdetail NewUser(UserdetailVo userdetail) {
-		Userdetail user = new Userdetail();
-		user.setAvatar(userdetail.getAvatar());
-		user.setEmail(userdetail.getEmail());
-		user.setFirst_name(userdetail.getFirst_name());
-		user.setLast_name(userdetail.getLast_name());
-		userdetailRepo.save(user);
-		return user;
+	@Transactional
+	public Userdetail NewUser(UserdetailVo userdetail) throws Exception {
+
+		try {
+			Userdetail user = new Userdetail();
+			user.setAvatar(userdetail.getAvatar());
+			user.setEmail(userdetail.getEmail());
+			user.setFirst_name(userdetail.getFirst_name());
+			user.setLast_name(userdetail.getLast_name());
+			userdetailRepo.save(user);
+			return user;
+		} catch (UnexpectedRollbackException e) {
+			throw new Exception("");
+		}
+
 	}
 
 	public Userdetail getUser(String email) {
 		Userdetail user = userdetailRepo.findByEmail(email);
 		return user;
-
 	}
-
 }

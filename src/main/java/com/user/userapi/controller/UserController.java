@@ -27,7 +27,7 @@ public class UserController extends BaseClass {
 	}
 
 	@RequestMapping(value = "/newuser", method = RequestMethod.POST)
-	public ResponseVO NewUser(@RequestBody UserdetailVo userdetail) {
+	public ResponseVO NewUser(@RequestBody UserdetailVo userdetail) throws Exception {
 		final ResponseVO responseVO = new ResponseVO();
 		return super.success(responseVO, userService.NewUser(userdetail), MessageStore.SUCCESS);
 
