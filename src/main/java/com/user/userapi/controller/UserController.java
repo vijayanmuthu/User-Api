@@ -20,24 +20,21 @@ public class UserController extends BaseClass {
 	@Autowired
 	UserService userService;
 
-	@RequestMapping(value = "/get/user")
-	public ResponseVO getuserDetails() {
-		final ResponseVO responseVO = new ResponseVO();
-		return super.success(responseVO, userService.getuserDetails(), MessageStore.SUCCESS);
-	}
+//	@RequestMapping(value = "/remoteuser")
+//	public ResponseVO getuserDetails() {
+//		final ResponseVO responseVO = new ResponseVO();
+//		return super.success(responseVO, userService.getuserDetails(), MessageStore.SUCCESS);
+//	}
 
-	@RequestMapping(value = "/newuser", method = RequestMethod.POST)
+	@RequestMapping(value = "/user", method = RequestMethod.POST)
 	public ResponseVO NewUser(@RequestBody UserdetailVo userdetail) throws Exception {
 		final ResponseVO responseVO = new ResponseVO();
 		return super.success(responseVO, userService.NewUser(userdetail), MessageStore.SUCCESS);
-
 	}
 
-	@RequestMapping(value = "/getuser", method = RequestMethod.GET)
+	@RequestMapping(value = "/user", method = RequestMethod.GET)
 	public ResponseVO getUser(@RequestParam String email) {
 		final ResponseVO responseVO = new ResponseVO();
 		return super.success(responseVO, userService.getUser(email), MessageStore.SUCCESS);
-
 	}
-
 }

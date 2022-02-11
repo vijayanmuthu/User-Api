@@ -12,15 +12,26 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.user.userapi.responce.ResponseVO;
 
 @ControllerAdvice
-public class GlobleException {
+public class GlobalException {
+	
+	static ResponseVO response = new ResponseVO();
 
 	@ExceptionHandler(value = SQLIntegrityConstraintViolationException.class)
 	public ResponseEntity<?> exception(Exception exception) {
-		ResponseVO response = new ResponseVO();
+
 		response.setCode(HttpServletResponse.SC_BAD_REQUEST);
-		response.setMessage("error");
+		response.setMessage("email alreay exist");
 		response.setStatus("error");
-		return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(value = NullPointerException.class)
+	public ResponseEntity<?> NullPointer(Exception exception) {
+
+		response.setCode(HttpServletResponse.SC_BAD_REQUEST);
+		response.setMessage("email not Null");
+		response.setStatus("error");
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 
 	}
 
