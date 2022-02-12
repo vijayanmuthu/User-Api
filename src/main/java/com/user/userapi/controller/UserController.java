@@ -20,12 +20,6 @@ public class UserController extends BaseClass {
 	@Autowired
 	UserService userService;
 
-//	@RequestMapping(value = "/remoteuser")
-//	public ResponseVO getuserDetails() {
-//		final ResponseVO responseVO = new ResponseVO();
-//		return super.success(responseVO, userService.getuserDetails(), MessageStore.SUCCESS);
-//	}
-
 	@RequestMapping(value = "/user", method = RequestMethod.POST)
 	public ResponseVO NewUser(@RequestBody UserdetailVo userdetail) throws Exception {
 		final ResponseVO responseVO = new ResponseVO();
