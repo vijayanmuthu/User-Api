@@ -30,5 +30,6 @@ public class UserController extends BaseClass {
 	public ResponseVO getUser(@RequestParam String email) {
 		final ResponseVO responseVO = new ResponseVO();
 		return super.success(responseVO, userService.getUser(email), MessageStore.SUCCESS);
+
 	}
 }

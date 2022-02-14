@@ -1,12 +1,10 @@
 package com.user.userapi.service;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.transaction.Transactional;
-import javax.xml.bind.ValidationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,12 +29,14 @@ public class UserService {
 	@Value("${url}")
 	private String url;
 
+	@Transactional
 	@Scheduled(fixedRate = 5000)
-	public void getuserDetails() {
+	public ResponseEntity<PageDetail> getuserDetails() {
 
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<PageDetail> userResponseEntity = restTemplate.getForEntity(url, PageDetail.class);
 		this.postUser(userResponseEntity.getBody().data);
+		return userResponseEntity;
 	}
 
 	public void postUser(List<UserdetailVo> userdetailVos) {
@@ -58,23 +58,24 @@ public class UserService {
 				userDetail.setEmail(userdetailVo.getEmail());
 				userDetail.setFirst_name(userdetailVo.getFirst_name());
 				userDetail.setLast_name(userdetailVo.getLast_name());
-				dbmap.put("UserDetail", userDetail);
+				dbmap.put(userDetail.getEmail(), userDetail);
+			} else {
+				userdetailRepo.setUserInfoByEmail(userdetailVo.getFirst_name(), userdetailVo.getLast_name(),
+				 		userdetailVo.getAvatar(), userdetailVo.getEmail());
 			}
 		}
 		userdetailRepo.saveAll(dbmap.values());
 	}
 
 	@Transactional
-	public Userdetail NewUser(UserdetailVo userdetail)
-			throws SQLIntegrityConstraintViolationException, ValidationException {
+	public Userdetail NewUser(UserdetailVo userdetail) {
 		if (userdetail.getEmail() == null) {
-			throw new ValidationException("email is not null");
+			throw new com.user.userapi.exception.ValidationException(url);
 		}
 		Userdetail userDetailByemail = userdetailRepo.findByEmail(userdetail.getEmail());
 		if (userDetailByemail != null) {
 			throw new EmailFoundException("Email Found Exception");
 		}
-
 		Userdetail user = new Userdetail();
 		user.setAvatar(userdetail.getAvatar());
 		user.setEmail(userdetail.getEmail());

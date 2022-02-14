@@ -12,4 +12,7 @@ public class BaseClass {
 		responseVO.setResponse(response);
 		return responseVO;
 	}
+
+	
+	
 }
