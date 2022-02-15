@@ -50,27 +50,29 @@ public class UserService {
 		for (Userdetail uservo : userdetails) {
 			dbmap.put(uservo.getEmail(), uservo);
 		}
-
 		for (UserdetailVo userdetailVo : userdetailVos) {
-			if (!dbmap.containsKey(userdetailVo.getEmail())) {
-				Userdetail userDetail = new Userdetail();
-				userDetail.setAvatar(userdetailVo.getAvatar());
-				userDetail.setEmail(userdetailVo.getEmail());
-				userDetail.setFirst_name(userdetailVo.getFirst_name());
-				userDetail.setLast_name(userdetailVo.getLast_name());
-				dbmap.put(userDetail.getEmail(), userDetail);
-			} else {
-				userdetailRepo.setUserInfoByEmail(userdetailVo.getFirst_name(), userdetailVo.getLast_name(),
-				 		userdetailVo.getAvatar(), userdetailVo.getEmail());
+			final String email = String.valueOf(userdetailVo.getEmail());
+			final String avatar = String.valueOf(userdetailVo.getAvatar());
+			final String firstName = String.valueOf(userdetailVo.getFirst_name());
+			final String lastname = String.valueOf(userdetailVo.getLast_name());
+			Userdetail userdetail = dbmap.get(email);
+			if (userdetail == null) {
+				userdetail = new Userdetail();
+				userdetail.setEmail(String.valueOf(email));
 			}
+			userdetail.setAvatar(String.valueOf(avatar));
+			userdetail.setFirst_name(firstName);
+			userdetail.setLast_name(lastname);
+			dbmap.put(userdetail.getEmail(), userdetail);
 		}
 		userdetailRepo.saveAll(dbmap.values());
 	}
 
 	@Transactional
 	public Userdetail NewUser(UserdetailVo userdetail) {
+		
 		if (userdetail.getEmail() == null) {
-			throw new com.user.userapi.exception.ValidationException(url);
+			throw new com.user.userapi.exception.ValidationException("Email is Null");
 		}
 		Userdetail userDetailByemail = userdetailRepo.findByEmail(userdetail.getEmail());
 		if (userDetailByemail != null) {
