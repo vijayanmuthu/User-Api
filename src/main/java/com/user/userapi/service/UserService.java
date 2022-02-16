@@ -6,6 +6,9 @@ import java.util.Map;
 
 import javax.transaction.Transactional;
 
+import org.passay.CharacterRule;
+import org.passay.EnglishCharacterData;
+import org.passay.PasswordGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.user.userapi.Entity.Userdetail;
+import com.user.userapi.config.WebSecurityConfig;
 import com.user.userapi.exception.EmailFoundException;
 import com.user.userapi.repo.UserdetailRepo;
 import com.user.userapi.valueObject.PageDetail;
@@ -26,6 +30,8 @@ public class UserService {
 	@Autowired
 	UserdetailRepo userdetailRepo;
 
+	@Autowired
+	WebSecurityConfig  webSecurityConfig;
 	@Value("${url}")
 	private String url;
 
@@ -41,6 +47,11 @@ public class UserService {
 
 	public void postUser(List<UserdetailVo> userdetailVos) {
 
+		CharacterRule LCR = new CharacterRule(EnglishCharacterData.LowerCase);
+		LCR.setNumberOfCharacters(2);
+		CharacterRule UCR = new CharacterRule(EnglishCharacterData.UpperCase);
+		UCR.setNumberOfCharacters(2);
+		PasswordGenerator passGen = new PasswordGenerator();
 		Map<String, Object> remoteusermap = new HashMap<>();
 		for (UserdetailVo uservo : userdetailVos) {
 			remoteusermap.put(uservo.getEmail(), uservo);
@@ -55,10 +66,12 @@ public class UserService {
 			final String avatar = String.valueOf(userdetailVo.getAvatar());
 			final String firstName = String.valueOf(userdetailVo.getFirst_name());
 			final String lastname = String.valueOf(userdetailVo.getLast_name());
+			String password = passGen.generatePassword(4, LCR, UCR);
 			Userdetail userdetail = dbmap.get(email);
 			if (userdetail == null) {
 				userdetail = new Userdetail();
 				userdetail.setEmail(String.valueOf(email));
+				userdetail.setPassword(webSecurityConfig.passwordEncoder().encode(password));
 			}
 			userdetail.setAvatar(String.valueOf(avatar));
 			userdetail.setFirst_name(firstName);
@@ -70,7 +83,7 @@ public class UserService {
 
 	@Transactional
 	public Userdetail NewUser(UserdetailVo userdetail) {
-		
+
 		if (userdetail.getEmail() == null) {
 			throw new com.user.userapi.exception.ValidationException("Email is Null");
 		}
@@ -83,6 +96,7 @@ public class UserService {
 		user.setEmail(userdetail.getEmail());
 		user.setFirst_name(userdetail.getFirst_name());
 		user.setLast_name(userdetail.getLast_name());
+		user.setPassword(webSecurityConfig.passwordEncoder().encode(userdetail.getPassword()));
 		userdetailRepo.save(user);
 		return user;
 	}

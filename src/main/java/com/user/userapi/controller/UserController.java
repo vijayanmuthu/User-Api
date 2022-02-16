@@ -26,7 +26,7 @@ public class UserController extends BaseClass {
 		return super.success(responseVO, userService.NewUser(userdetail), MessageStore.SUCCESS);
 	}
 
-	@RequestMapping(value = "/user", method = RequestMethod.GET)
+	@RequestMapping(value = "/user/get", method = RequestMethod.GET)
 	public ResponseVO getUser(@RequestParam String email) {
 		final ResponseVO responseVO = new ResponseVO();
 		return super.success(responseVO, userService.getUser(email), MessageStore.SUCCESS);

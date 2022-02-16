@@ -23,5 +23,6 @@ public class Userdetail {
 	private String first_name;
 	private String last_name;
 	private String avatar;
+	private String password;
 
 }
