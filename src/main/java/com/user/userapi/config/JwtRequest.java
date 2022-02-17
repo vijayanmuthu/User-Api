@@ -3,9 +3,11 @@ package com.user.userapi.config;
 import java.io.Serializable;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 @Getter
 @Setter
+@NoArgsConstructor
 public class JwtRequest implements Serializable {
 
 	/**
@@ -15,11 +17,8 @@ public class JwtRequest implements Serializable {
 	private String email;
 	private String password;
 	
-	//need default constructor for JSON Parsing
-	public JwtRequest()
-	{
-		
-	}
+	
+	
 
 	public JwtRequest(String email, String password) {
 		this.setEmail(email);

@@ -14,11 +14,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.user.userapi.exception.JwtExpiredException;
+
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-//	@Autowired
-//	private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+	@Autowired
+	private JwtExpiredException jwtExpiredException;
 
 	@Autowired
 	private UserDetailsService jwtUserDetailsService;
@@ -28,30 +30,29 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(AuthenticationManagerBuilder auth) throws Exception {
-		
+
 		auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
 	}
+
 	@Bean
 	public PasswordEncoder passwordEncoder() {
+		
 		return new BCryptPasswordEncoder();
 	}
+
 	@Bean
 	@Override
 	public AuthenticationManager authenticationManagerBean() throws Exception {
-		
+
 		return super.authenticationManagerBean();
 	}
 
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-		
-		httpSecurity.csrf().disable()
-				.authorizeRequests().antMatchers("/authenticate1", "/user").permitAll().
-				anyRequest().authenticated().and().
-			sessionManagement()
+
+		httpSecurity.csrf().disable().authorizeRequests().antMatchers("/authenticate1","/user").permitAll()
+				.anyRequest().authenticated().and().exceptionHandling().authenticationEntryPoint(jwtExpiredException).and().sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 	}
-	
-
 }

@@ -36,15 +36,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 		String username = null;
 		String jwtToken = null;
-		
+
 		if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
 			jwtToken = requestTokenHeader.substring(7);
+			username = jwtTokenUtil.getUsernameFromToken(jwtToken);
 			try {
 				username = jwtTokenUtil.getUsernameFromToken(jwtToken);
 			} catch (IllegalArgumentException e) {
 				System.out.println("Unable to get JWT Token");
 			} catch (ExpiredJwtException e) {
-				System.out.println("JWT Token has expired");
+				request.setAttribute("expired", e);
 			}
 		} else {
 			logger.warn("JWT Token does not begin with Bearer String");
@@ -55,7 +56,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 			UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
 
-			// if token is valid configure Spring Security to manually set
+			// once token is valid configure Spring Security
 			// authentication
 			if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
 
