@@ -17,8 +17,10 @@ import org.springframework.web.client.RestTemplate;
 import com.user.userapi.Entity.Userdetail;
 import com.user.userapi.config.WebSecurityConfig;
 import com.user.userapi.exception.EmailFoundException;
+import com.user.userapi.exception.EmailValidationException;
 import com.user.userapi.repo.UserdetailRepo;
 import com.user.userapi.valueObject.PageDetail;
+import com.user.userapi.valueObject.UserVo;
 import com.user.userapi.valueObject.UserdetailVo;
 
 @Service
@@ -77,11 +79,11 @@ public class UserService {
 	public Userdetail NewUser(UserdetailVo userdetail) {
 
 		if (userdetail.getEmail() == null) {
-			throw new com.user.userapi.exception.ValidationException("Email is Null");
+			throw new EmailValidationException("Email not found");
 		}
 		Userdetail userDetailByemail = userdetailRepo.findByEmail(userdetail.getEmail());
 		if (userDetailByemail != null) {
-			throw new EmailFoundException("Email Found Exception");
+			throw new EmailFoundException("Email Exist Exception");
 		}
 		Userdetail user = new Userdetail();
 		user.setAvatar(userdetail.getAvatar());
@@ -93,9 +95,15 @@ public class UserService {
 		return user;
 	}
 
-	public Userdetail getUser(String email) {
+	public UserVo getUser(String email) {
 
 		Userdetail user = userdetailRepo.findByEmail(email);
-		return user;
+		UserVo userVo = new UserVo();
+		userVo.setId(user.getId());
+		userVo.setAvatar(user.getAvatar());
+		userVo.setEmail(user.getEmail());
+		userVo.setFirst_name(user.getFirst_name());
+		userVo.setLast_name(user.getLast_name());
+		return userVo;
 	}
 }

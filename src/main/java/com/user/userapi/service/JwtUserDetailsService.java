@@ -10,16 +10,16 @@ import org.springframework.stereotype.Service;
 import com.user.userapi.Entity.Userdetail;
 import com.user.userapi.exception.UsernameNotFoundError;
 import com.user.userapi.repo.UserdetailRepo;
+
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
+
 	@Autowired
 	UserdetailRepo userdetailRepo;
-	
-	
 
 	@Override
-	public UserDetails loadUserByUsername(String username){
-		Userdetail user = userdetailRepo.findByEmail(username);
+	public UserDetails loadUserByUsername(String email) {
+		Userdetail user = userdetailRepo.findByEmail(email);
 		if (user == null) {
 			throw new UsernameNotFoundError("User not found");
 		}

@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.user.userapi.config.JwtRequest;
 import com.user.userapi.config.JwtTokenUtil;
+import com.user.userapi.exception.PasswordNotFoundException;
+import com.user.userapi.repo.UserdetailRepo;
 import com.user.userapi.responce.JwtResponse;
 import com.user.userapi.service.JwtUserDetailsService;
 @RestController
@@ -21,6 +23,9 @@ public class JwtAuthenticationController {
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
+	@Autowired
+	UserdetailRepo userdetailRepo;
+	
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
 
@@ -41,12 +46,13 @@ public class JwtAuthenticationController {
 	}
 	private void authenticate(String username, String password) throws Exception {
 		try {
+		
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 		} 
 		catch (DisabledException e) {
 			throw new Exception("USER_DISABLED");
 		} catch (BadCredentialsException e) {
-			throw new Exception("INVALID_CREDENTIALS");
+			throw new PasswordNotFoundException("Password incorrcect");
 		}
 	}
 
