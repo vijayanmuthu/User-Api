@@ -23,7 +23,7 @@ public class UserController extends BaseClass {
 	@RequestMapping(value = "/user", method = RequestMethod.POST)
 	public ResponseVO NewUser(@RequestBody UserdetailVo userdetail) throws Exception {
 		final ResponseVO responseVO = new ResponseVO();
-		return super.success(responseVO, userService.NewUser(userdetail), MessageStore.SUCCESS);
+		return super.success(responseVO, userService.NewUser(userdetail), MessageStore.create);
 	}
 
 	@RequestMapping(value = "/user/get", method = RequestMethod.GET)

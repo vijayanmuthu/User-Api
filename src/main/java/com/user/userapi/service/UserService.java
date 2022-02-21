@@ -44,30 +44,30 @@ public class UserService {
 		return userResponseEntity;
 	}
 
-	public void postUser(List<UserdetailVo> userdetailVos) {
+	public void postUser(List<UserdetailVo> userdetailVoList) {
 
 		Map<String, Object> remoteusermap = new HashMap<>();
-		for (UserdetailVo uservo : userdetailVos) {
+		for (UserdetailVo uservo : userdetailVoList) {
 			remoteusermap.put(uservo.getEmail(), uservo);
 		}
 		List<Userdetail> userdetails = userdetailRepo.findByEmailIn(remoteusermap.keySet());
 		Map<String, Userdetail> dbmap = new HashMap<>();
-		for (Userdetail uservo : userdetails) {
-			dbmap.put(uservo.getEmail(), uservo);
+		for (Userdetail userdetail : userdetails) {
+			dbmap.put(userdetail.getEmail(), userdetail);
 		}
-		for (UserdetailVo userdetailVo : userdetailVos) {
+		for (UserdetailVo userdetailVo : userdetailVoList) {
 			final String email = String.valueOf(userdetailVo.getEmail());
 			final String avatar = String.valueOf(userdetailVo.getAvatar());
 			final String firstName = String.valueOf(userdetailVo.getFirst_name());
 			final String lastname = String.valueOf(userdetailVo.getLast_name());
-			String password = "karthik";
+			String password = "password";
 			Userdetail userdetail = dbmap.get(email);
 			if (userdetail == null) {
 				userdetail = new Userdetail();
 				userdetail.setEmail(String.valueOf(email));
 				userdetail.setPassword(webSecurityConfig.passwordEncoder().encode(password));
 			}
-			userdetail.setAvatar(String.valueOf(avatar));
+			userdetail.setAvatar(String.valueOf(avatar));    
 			userdetail.setFirst_name(firstName);
 			userdetail.setLast_name(lastname);
 			dbmap.put(userdetail.getEmail(), userdetail);
@@ -76,23 +76,29 @@ public class UserService {
 	}
 
 	@Transactional
-	public Userdetail NewUser(UserdetailVo userdetail) {
+	public UserVo NewUser(UserdetailVo userdetailVo) {
 
-		if (userdetail.getEmail() == null) {
+		if (userdetailVo.getEmail() == null) {
 			throw new EmailValidationException("Email not found");
 		}
-		Userdetail userDetailByemail = userdetailRepo.findByEmail(userdetail.getEmail());
+		Userdetail userDetailByemail = userdetailRepo.findByEmail(userdetailVo.getEmail());
 		if (userDetailByemail != null) {
 			throw new EmailFoundException("Email Exist Exception");
 		}
 		Userdetail user = new Userdetail();
-		user.setAvatar(userdetail.getAvatar());
-		user.setEmail(userdetail.getEmail());
-		user.setFirst_name(userdetail.getFirst_name());
-		user.setLast_name(userdetail.getLast_name());
-		user.setPassword(webSecurityConfig.passwordEncoder().encode(userdetail.getPassword()));
+		user.setAvatar(userdetailVo.getAvatar());
+		user.setEmail(userdetailVo.getEmail());
+		user.setFirst_name(userdetailVo.getFirst_name());
+		user.setLast_name(userdetailVo.getLast_name());
+		user.setPassword(webSecurityConfig.passwordEncoder().encode(userdetailVo.getPassword()));
 		userdetailRepo.save(user);
-		return user;
+		UserVo userVo = new UserVo();
+		userVo.setId(user.getId());
+		userVo.setAvatar(user.getAvatar());
+		userVo.setEmail(user.getEmail());
+		userVo.setFirst_name(user.getFirst_name());
+		userVo.setLast_name(user.getLast_name());
+		return userVo;
 	}
 
 	public UserVo getUser(String email) {

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
 @Component
 public class JwtTokenUtil implements Serializable {
 
@@ -41,11 +42,10 @@ public class JwtTokenUtil implements Serializable {
 		return claimsResolver.apply(claims);
 	}
 
-	private Claims getAllClaimsFromToken(String token){
+	private Claims getAllClaimsFromToken(String token) {
 
 		return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
 	}
-
 
 	private Boolean isTokenExpired(String token) {
 
@@ -54,10 +54,11 @@ public class JwtTokenUtil implements Serializable {
 	}
 
 	public String generateToken(UserDetails userDetails) {
-		
+
 		Map<String, Object> claims = new HashMap<>();
 		return doGenerateToken(claims, userDetails.getUsername());
 	}
+
 //Generate token
 	private String doGenerateToken(Map<String, Object> claims, String subject) {
 
@@ -68,7 +69,7 @@ public class JwtTokenUtil implements Serializable {
 
 //validate token
 	public Boolean validateToken(String token, UserDetails userDetails) {
-		
+
 		final String username = getUsernameFromToken(token);
 		return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
 	}
