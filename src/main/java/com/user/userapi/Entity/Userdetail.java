@@ -12,6 +12,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
+
+
 public class Userdetail {
 
 	@Id
@@ -24,5 +26,4 @@ public class Userdetail {
 	private String last_name;
 	private String avatar;
 	private String password;
-
 }

@@ -35,7 +35,7 @@ public class JwtAuthenticationController extends BaseClass {
 	@Autowired
 	private JwtUserDetailsService userDetailsService;
 
-	@RequestMapping(value = "/authenticate1", method = RequestMethod.POST)
+	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
 	public ResponseVO createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
 
 		ResponseVO responseVO = new ResponseVO();
@@ -44,7 +44,7 @@ public class JwtAuthenticationController extends BaseClass {
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
 
 		final String token = jwtTokenUtil.generateToken(userDetails);
-		return super.success(responseVO, new JwtResponse(token), MessageStore.generate);
+		return super.success(responseVO, new JwtResponse(token), MessageStore.GENERATE);
 	}
 
 	private void authenticate(String username, String password) throws Exception {

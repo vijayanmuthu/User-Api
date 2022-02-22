@@ -76,21 +76,21 @@ public class UserService {
 	}
 
 	@Transactional
-	public UserVo NewUser(UserdetailVo userdetailVo) {
+	public UserVo NewUser(Userdetail userdetail) {
 
-		if (userdetailVo.getEmail() == null) {
+		if (userdetail.getEmail() == null) {
 			throw new EmailValidationException("Email not found");
 		}
-		Userdetail userDetailByemail = userdetailRepo.findByEmail(userdetailVo.getEmail());
+		Userdetail userDetailByemail = userdetailRepo.findByEmail(userdetail.getEmail());
 		if (userDetailByemail != null) {
 			throw new EmailFoundException("Email Exist Exception");
 		}
 		Userdetail user = new Userdetail();
-		user.setAvatar(userdetailVo.getAvatar());
-		user.setEmail(userdetailVo.getEmail());
-		user.setFirst_name(userdetailVo.getFirst_name());
-		user.setLast_name(userdetailVo.getLast_name());
-		user.setPassword(webSecurityConfig.passwordEncoder().encode(userdetailVo.getPassword()));
+		user.setAvatar(userdetail.getAvatar());
+		user.setEmail(userdetail.getEmail());
+		user.setFirst_name(userdetail.getFirst_name());
+		user.setLast_name(userdetail.getLast_name());
+		user.setPassword(webSecurityConfig.passwordEncoder().encode(userdetail.getPassword()));
 		userdetailRepo.save(user);
 		UserVo userVo = new UserVo();
 		userVo.setId(user.getId());
