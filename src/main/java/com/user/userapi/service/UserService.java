@@ -3,6 +3,7 @@ package com.user.userapi.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.transaction.Transactional;
 
@@ -17,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import com.user.userapi.Entity.Userdetail;
 import com.user.userapi.config.WebSecurityConfig;
 import com.user.userapi.exception.EmailFoundException;
+import com.user.userapi.exception.EmailNotMatchException;
 import com.user.userapi.exception.EmailValidationException;
 import com.user.userapi.repo.UserdetailRepo;
 import com.user.userapi.valueObject.PageDetail;
@@ -38,7 +40,7 @@ public class UserService {
 	@Scheduled(fixedRate = 5000)
 	public ResponseEntity<PageDetail> getuserDetails() {
 
-		RestTemplate restTemplate = new RestTemplate();
+		final RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<PageDetail> userResponseEntity = restTemplate.getForEntity(url, PageDetail.class);
 		this.postUser(userResponseEntity.getBody().data);
 		return userResponseEntity;
@@ -75,9 +77,22 @@ public class UserService {
 		userdetailRepo.saveAll(dbmap.values());
 	}
 
+	public boolean validateEmail(String email) {
+		
+		String emailReg = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
+		+ "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
+		Pattern pattern = Pattern.compile(emailReg);
+		if (pattern.matcher(email).matches()) {
+		return true;
+		} else {
+		 throw new EmailNotMatchException("email not valid");
+		}
+		}
+	
 	@Transactional
 	public UserVo NewUser(Userdetail userdetail) {
 
+		
 		if (userdetail.getEmail() == null) {
 			throw new EmailValidationException("Email not found");
 		}
@@ -85,6 +100,7 @@ public class UserService {
 		if (userDetailByemail != null) {
 			throw new EmailFoundException("Email Exist Exception");
 		}
+		this.validateEmail(userdetail.getEmail());
 		Userdetail user = new Userdetail();
 		user.setAvatar(userdetail.getAvatar());
 		user.setEmail(userdetail.getEmail());

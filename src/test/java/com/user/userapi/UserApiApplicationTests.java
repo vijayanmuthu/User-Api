@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -66,14 +67,13 @@ public class UserApiApplicationTests {
 		Userdetail userdetail = new Userdetail();
 		userdetail.setId(1);
 		userdetail.setAvatar("test");
-		userdetail.setEmail("test");
+		userdetail.setEmail("test@gmail.com");
 		userdetail.setFirst_name("test");
 		userdetail.setLast_name("test");
 		userdetail.setPassword("test");
 		MvcResult resultActions = mockMvc.perform(post("/user").contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(userdetail)))
 				.andExpect(status().isOk()).andReturn();
-		System.out.println(resultActions.getResponse().getContentAsString());
 		assertNotNull(resultActions.getResponse().getContentAsString());
 
 	}
@@ -97,8 +97,67 @@ public class UserApiApplicationTests {
 		String payload = new String(decoder.decode(chunks));
 		JsonNode json = mapper.readTree(payload);
 		String name = json.get("sub").asText();
-		mockMvc.perform(get("/user?email=" + name).header("Authorization", "Bearer " + token))
+		mockMvc.perform(get("/userdetail?email=" + name).header("Authorization", "Bearer " + token))
 				.andExpect(status().isOk());
 
 	}
+
+	// test password correct or not
+	@Transactional
+	@Test
+	public void testPassword() throws Exception {
+		JwtRequest jwtRequest = new JwtRequest();
+		jwtRequest.setEmail("emma.wong@reqres.in");
+		jwtRequest.setPassword("qwer");
+		mockMvc.perform(MockMvcRequestBuilders.post("/authenticate").contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(jwtRequest)))
+				.andExpect(status().isBadRequest());
+
+	}
+
+	// test email Exist or not
+	@Transactional
+	@Test
+	public void testEmail() throws Exception {
+		Userdetail userdetail = new Userdetail();
+		userdetail.setId(1);
+		userdetail.setAvatar("test");
+		userdetail.setEmail("emma.wong@reqres.in");
+		userdetail.setFirst_name("test");
+		userdetail.setLast_name("test");
+		userdetail.setPassword("test");
+		Mockito.when(userdetailRepo.findByEmail(userdetail.getEmail()));
+		mockMvc.perform(post("/user").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(userdetail))).andExpect(status().isBadRequest());
+
+	}
+
+	// test username exist or not
+	@Test
+	public void testUsername() throws Exception {
+		Userdetail userdetail = new Userdetail();
+		userdetail.setId(1);
+		userdetail.setAvatar("test");
+		userdetail.setEmail("emma.wong@reqres.in");
+		userdetail.setFirst_name("test");
+		userdetail.setLast_name("test");
+		userdetail.setPassword("test");
+		mockMvc.perform(post("/user").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(userdetail))).andExpect(status().isBadRequest());
+	}
+
+	// test email is valid or not
+	@Test
+	public void testValidEmail() throws Exception {
+		Userdetail userdetail = new Userdetail();
+		userdetail.setId(1);
+		userdetail.setAvatar("test");
+		userdetail.setEmail("rameshgmail.com");
+		userdetail.setFirst_name("test");
+		userdetail.setLast_name("test");
+		userdetail.setPassword("test");
+		mockMvc.perform(post("/user").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(userdetail))).andExpect(status().isBadRequest());
+	}
+
 }

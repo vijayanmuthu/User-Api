@@ -62,4 +62,14 @@ public class GlobalException {
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 
 	}
+	@ExceptionHandler(value = EmailNotMatchException.class)
+	public ResponseEntity<?> EmailNotMatchException(Exception exception) {
+
+		ResponseVO response = new ResponseVO();
+		response.setCode(HttpServletResponse.SC_BAD_REQUEST);
+		response.setMessage("Email not valid");
+		response.setResponse(response.getResponse());
+		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+
+	}
 }
