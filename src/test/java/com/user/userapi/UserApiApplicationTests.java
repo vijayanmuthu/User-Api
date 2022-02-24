@@ -1,11 +1,12 @@
 package com.user.userapi;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Base64;
+import java.security.Principal;
 
 import javax.transaction.Transactional;
 
@@ -88,17 +89,14 @@ public class UserApiApplicationTests {
 				.perform(MockMvcRequestBuilders.post("/authenticate").contentType(MediaType.APPLICATION_JSON)
 						.accept(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(jwtRequest)))
 				.andReturn();
-
 		ResponseVO userdetail2 = mapper.readValue(resultActions.getResponse().getContentAsString(), ResponseVO.class);
 		JsonNode json1 = mapper.readTree(mapper.writeValueAsString(userdetail2.getResponse()));
 		String token = json1.get("jwttoken").asText();
-		String chunks = token.split("\\.")[1];
-		Base64.Decoder decoder = Base64.getDecoder();
-		String payload = new String(decoder.decode(chunks));
-		JsonNode json = mapper.readTree(payload);
-		String name = json.get("sub").asText();
-		mockMvc.perform(get("/userdetail?email=" + name).header("Authorization", "Bearer " + token))
+		Principal principal = Mockito.mock(Principal.class);
+		Mockito.when(principal.getName()).thenReturn(jwtRequest.getEmail());
+		mockMvc.perform(get("/userdetail").principal(principal).header("Authorization", "Bearer " + token))
 				.andExpect(status().isOk());
+		assertEquals(principal.getName(), "emma.wong@reqres.in");
 
 	}
 
@@ -126,7 +124,6 @@ public class UserApiApplicationTests {
 		userdetail.setFirst_name("test");
 		userdetail.setLast_name("test");
 		userdetail.setPassword("test");
-		Mockito.when(userdetailRepo.findByEmail(userdetail.getEmail()));
 		mockMvc.perform(post("/user").contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
 				.content(mapper.writeValueAsString(userdetail))).andExpect(status().isBadRequest());
 
@@ -152,7 +149,7 @@ public class UserApiApplicationTests {
 		Userdetail userdetail = new Userdetail();
 		userdetail.setId(1);
 		userdetail.setAvatar("test");
-		userdetail.setEmail("rameshgmail.com");
+		userdetail.setEmail("vj1@gmail.com");
 		userdetail.setFirst_name("test");
 		userdetail.setLast_name("test");
 		userdetail.setPassword("test");

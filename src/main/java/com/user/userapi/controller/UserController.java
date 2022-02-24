@@ -1,10 +1,11 @@
 package com.user.userapi.controller;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.user.userapi.Entity.Userdetail;
@@ -27,9 +28,9 @@ public class UserController extends BaseClass {
 	}
 
 	@RequestMapping(value = "/userdetail", method = RequestMethod.GET)
-	public ResponseVO getUser(@RequestParam String email) {
-		final ResponseVO responseVO = new ResponseVO();
-		return super.success(responseVO, userService.getUser(email), MessageStore.GET);
+	public ResponseVO getUser(Principal principal) {
+		final ResponseVO responseVO = new ResponseVO();	
+		return super.success(responseVO, userService.getUser(principal.getName()), MessageStore.GET);
 
 	}
 }
