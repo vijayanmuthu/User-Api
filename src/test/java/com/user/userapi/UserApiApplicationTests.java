@@ -145,11 +145,12 @@ public class UserApiApplicationTests {
 
 	// test email is valid or not
 	@Test
+	@Transactional
 	public void testValidEmail() throws Exception {
 		Userdetail userdetail = new Userdetail();
 		userdetail.setId(1);
 		userdetail.setAvatar("test");
-		userdetail.setEmail("vj1@gmail.com");
+		userdetail.setEmail("vjgmail.com");
 		userdetail.setFirst_name("test");
 		userdetail.setLast_name("test");
 		userdetail.setPassword("test");
